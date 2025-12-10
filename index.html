@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buggy Expense Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
+    input, select, button { width: 100%; padding: 10px; margin: 6px 0; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 8px; background: #eee; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+    button.delete { background: red; color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Buggy Expense Tracker</h2>
+
+    <input id="expenseName" placeholder="Expense name" />
+    <input id="expenseAmount" placeholder="Amount" />
+    <select id="expenseCategory">
+      <option value="Food">Food</option>
+      <option value="Transport">Transport</option>
+      <option value="Shopping">Shopping</option>
+    </select>
+    <button onclick="addExpense()">Add Expense</button>
+
+    <h3>Total: R<span id="total">0</span></h3>
+
+    <ul id="expenseList"></ul>
+  </div>
+
+  <script>
+    let expenses = [];
+
+    function addExpense() {
+      const name = document.getElementById('expenseName').value;
+      const amount = document.getElementById('expenseAmount').value;
+      const category = document.getElementById('expenseCategory').value;
+
+      // BUG: Allows letters in amount
+      if(!name || !amount) {
+        alert('Please enter name and amount');
+        return;
+      }
+
+      // BUG: Randomly fails to save expense
+      if(Math.random() < 0.3) {
+        alert('ERROR: Failed to save expense');
+        return;
+      }
+
+      // BUG: Category saved incorrectly
+      const wrongCategory = category === 'Food' ? 'Transport' : category;
+
+      expenses.push({name, amount, category: wrongCategory});
+      renderExpenses();
+      calculateTotal();
+    }
+
+    function renderExpenses() {
+      const list = document.getElementById('expenseList');
+      list.innerHTML = '';
+      expenses.forEach((exp, index) => {
+        const item = document.createElement('li');
+        item.textContent = `${exp.name} - R${exp.amount} (${exp.category})`;
+
+        // Delete button with BUG: deletes wrong item sometimes
+        const del = document.createElement('button');
+        del.textContent = 'Delete';
+        del.className = 'delete';
+        del.onclick = () => {
+          expenses.splice(index + (Math.random() < 0.5 ? 1 : 0), 1);
+          renderExpenses();
+          calculateTotal();
+        };
+
+        item.appendChild(del);
+        list.appendChild(item);
+      });
+    }
+
+    function calculateTotal() {
+      let total = 0;
+      expenses.forEach(exp => {
+        // BUG: Wrong calculation by appending a 0 to number
+        total += parseInt(exp.amount + '0');
+      });
+      document.getElementById('total').textContent = total;
+    }
+  </script>
+</body>
+  </html>
